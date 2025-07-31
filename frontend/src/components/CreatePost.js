@@ -7,8 +7,7 @@ const CreatePost = ({ onClose, onPostCreated }) => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        tags: '',
-        image: '' // Add image field
+        tags: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -26,10 +25,7 @@ const CreatePost = ({ onClose, onPostCreated }) => {
         setError('');
 
         try {
-            const response = await api.post('/api/posts', {
-                ...formData,
-                image: formData.image || '' // Always send image
-            });
+            const response = await api.post('/api/posts', formData);
             onPostCreated(response.data.post);
             onClose();
         } catch (error) {
