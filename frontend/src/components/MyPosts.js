@@ -31,9 +31,10 @@ const MyPosts = () => {
         }
     };
 
-    const handlePostCreated = (newPost) => {
-        setPosts(prev => [newPost, ...prev]);
-    };
+    const handlePostCreated = () => {
+        // Refetch user's posts from backend to ensure latest view
+        fetchMyPosts();
+    }
 
     const handlePostUpdate = (updatedPost) => {
         setPosts(prev => prev.map(post => 

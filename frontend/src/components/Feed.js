@@ -39,9 +39,10 @@ const Feed = () => {
         }
     };
 
-    const handlePostCreated = (newPost) => {
-        setPosts(prev => [newPost, ...prev]);
-    };
+    const handlePostCreated = () => {
+        // Refetch posts from backend to ensure latest feed
+        fetchPosts(1, true);
+    }
 
     const handlePostUpdate = (updatedPost) => {
         setPosts(prev => prev.map(post => 
