@@ -106,7 +106,7 @@ app.use('/api/auth/register', authLimiter);
 // CORS configuration with enhanced security
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://socialmedia-grzl.vercel.app' // <-- Add this line
+  'https://socialmedia-flax-ten.vercel.app'
 ];
 
 app.use(cors({
