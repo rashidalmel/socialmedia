@@ -25,7 +25,7 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
             setLiked(false);
         }
     }, [user, post.likes]);
-    const [likeCount, setLikeCount] = useState(post.likes.length);
+    const [likeCount, setLikeCount] = useState((post.likes || []).length);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState(post.comments || []);
     const [newComment, setNewComment] = useState('');
