@@ -85,14 +85,15 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
         }
 
         setDeleteLoading(true);
+        // Optimistically remove post from UI
+        if (onPostDeleted) {
+            onPostDeleted(post._id);
+        }
         try {
             await api.delete(`/api/posts/${post._id}`);
-            if (onPostDeleted) {
-                onPostDeleted(post._id);
-            }
         } catch (error) {
             console.error('Error deleting post:', error);
-            alert('Failed to delete post. Please try again.');
+            alert('Failed to delete post from server. Please refresh to sync.');
         } finally {
             setDeleteLoading(false);
         }
