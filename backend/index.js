@@ -105,8 +105,8 @@ app.use('/api/auth/register', authLimiter);
 
 // CORS configuration with enhanced security
 const allowedOrigins = [
-  'https://social-media-blog-1.onrender.com',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://socialmedia-grzl.vercel.app' // <-- Add this line
 ];
 
 app.use(cors({
