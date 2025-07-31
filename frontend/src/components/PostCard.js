@@ -12,7 +12,7 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
         // or when the likes on the post change.
         if (user) {
             // Handle both populated and non-populated like structures
-            const isLiked = post.likes.some(like => {
+            const isLiked = Array.isArray(post.likes) && post.likes.some(like => {
                 // If like.user is populated (has _id property), compare _id
                 if (like.user?._id) {
                     return like.user._id === user._id || like.user._id === user.id;
