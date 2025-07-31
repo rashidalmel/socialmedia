@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://social-media-blog-aspc.onrender.com',
+  baseURL: process.env.REACT_APP_API_URL,
   timeout: 10000, // 10 second timeout
   withCredentials: true, // Include cookies
 });
