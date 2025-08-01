@@ -21,7 +21,9 @@ const MyPosts = () => {
     const fetchMyPosts = async () => {
         try {
             setLoading(true);
+            console.log('Fetching my posts...');
             const response = await api.get('/api/posts/my');
+            console.log('Fetched my posts:', response.data.length, 'posts');
             setPosts(response.data);
         } catch (error) {
             setError('Failed to load your posts');
@@ -31,9 +33,26 @@ const MyPosts = () => {
         }
     };
 
-    const handlePostCreated = () => {
-        // Refetch user's posts from backend to ensure latest view
-        fetchMyPosts();
+    const handlePostCreated = (newPost) => {
+        // Immediately add the new post to the top of my posts for instant feedback
+        if (newPost) {
+            console.log('Adding new post to my posts immediately:', newPost);
+            // Transform the post to match the expected structure
+            const transformedPost = {
+                ...newPost,
+                likesCount: newPost.likes?.length || 0,
+                commentsCount: newPost.comments?.length || 0,
+                likes: newPost.likes || [],
+                comments: newPost.comments || []
+            };
+            setPosts(prev => [transformedPost, ...prev]);
+        }
+        
+        // Also refetch user's posts from backend to ensure latest view
+        console.log('Post created, refetching my posts...');
+        setTimeout(() => {
+            fetchMyPosts();
+        }, 1000);
     }
 
     const handlePostUpdate = (updatedPost) => {
@@ -43,7 +62,19 @@ const MyPosts = () => {
     };
 
     const handlePostDeleted = (deletedPostId) => {
-        setPosts(prev => prev.filter(post => post._id !== deletedPostId));
+        console.log('Post deleted, removing from my posts:', deletedPostId);
+        console.log('Current my posts before deletion:', posts.map(p => p._id));
+        
+        // Immediately update the state with the filtered posts
+        const updatedPosts = posts.filter(post => post._id !== deletedPostId);
+        console.log('My posts after deletion:', updatedPosts.map(p => p._id));
+        setPosts(updatedPosts);
+        
+        // Force a refresh of the user's posts after a short delay to ensure UI is in sync
+        setTimeout(() => {
+            console.log('Refreshing my posts after deletion...');
+            fetchMyPosts();
+        }, 1000);
     };
 
     if (loading) {

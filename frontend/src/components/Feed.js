@@ -20,8 +20,10 @@ const Feed = () => {
     const fetchPosts = async (pageNum = 1, reset = false) => {
         try {
             setLoading(true);
+            console.log('Fetching posts, page:', pageNum, 'reset:', reset);
             const response = await api.get(`/api/posts?page=${pageNum}&limit=10`);
             const { posts: newPosts, totalPages } = response.data;
+            console.log('Fetched posts:', newPosts.length, 'posts');
             
             if (reset) {
                 setPosts(newPosts);
@@ -39,15 +41,48 @@ const Feed = () => {
         }
     };
 
-    const handlePostCreated = () => {
-        // Refetch posts from backend to ensure latest feed
-        fetchPosts(1, true);
+    const handlePostCreated = (newPost) => {
+        // Immediately add the new post to the top of the feed for instant feedback
+        if (newPost) {
+            console.log('Adding new post to feed immediately:', newPost);
+            // Transform the post to match the expected structure
+            const transformedPost = {
+                ...newPost,
+                likesCount: newPost.likes?.length || 0,
+                commentsCount: newPost.comments?.length || 0,
+                isLiked: false,
+                comments: newPost.comments || []
+            };
+            setPosts(prev => [transformedPost, ...prev]);
+        }
+        
+        // Also refetch posts from backend to ensure latest feed (with a small delay)
+        console.log('Post created, refetching feed...');
+        setTimeout(() => {
+            fetchPosts(1, true);
+        }, 1000);
     }
 
     const handlePostUpdate = (updatedPost) => {
         setPosts(prev => prev.map(post => 
             post._id === updatedPost._id ? updatedPost : post
         ));
+    };
+
+    const handlePostDeleted = (deletedPostId) => {
+        console.log('Post deleted, removing from feed:', deletedPostId);
+        console.log('Current posts before deletion:', posts.map(p => p._id));
+        
+        // Immediately update the state with the filtered posts
+        const updatedPosts = posts.filter(post => post._id !== deletedPostId);
+        console.log('Posts after deletion:', updatedPosts.map(p => p._id));
+        setPosts(updatedPosts);
+        
+        // Force a refresh of the posts after a short delay to ensure UI is in sync
+        setTimeout(() => {
+            console.log('Refreshing feed after deletion...');
+            fetchPosts(1, true);
+        }, 1000);
     };
 
     const loadMore = () => {
@@ -107,9 +142,11 @@ const Feed = () => {
                         <div className="posts-container">
                             {posts.map(post => (
                                 <PostCard 
-                                    key={post._id} 
+                                    key={post._id}
                                     post={post} 
                                     onPostUpdate={handlePostUpdate}
+                                    onPostDeleted={handlePostDeleted}
+                                    showDeleteButton={true}
                                 />
                             ))}
                             

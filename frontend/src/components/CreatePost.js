@@ -30,9 +30,11 @@ const CreatePost = ({ onClose, onPostCreated }) => {
                 ...formData,
                 image: formData.image || '' // Always send image
             });
+            console.log('Post created successfully:', response.data);
             onPostCreated(response.data.post);
             onClose();
         } catch (error) {
+            console.error('Error creating post:', error);
             setError(error.response?.data?.message || 'Failed to create post');
         } finally {
             setLoading(false);

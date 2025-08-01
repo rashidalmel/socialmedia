@@ -31,6 +31,7 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
     const [newComment, setNewComment] = useState('');
     const [commentLoading, setCommentLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [isDeleted, setIsDeleted] = useState(false);
 
     const handleLike = async () => {
         try {
@@ -80,20 +81,44 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
     };
 
     const handleDelete = async () => {
+        if (isDeleted) {
+            console.log('Post already deleted, ignoring second attempt');
+            return;
+        }
+        
         if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
             return;
         }
 
         setDeleteLoading(true);
-        // Optimistically remove post from UI
-        if (onPostDeleted) {
-            onPostDeleted(post._id);
-        }
+        setIsDeleted(true); // Mark as deleted immediately to prevent double-clicks
+        console.log('Deleting post:', post._id);
+        
         try {
-            await api.delete(`/api/posts/${post._id}`);
+            // First delete from server
+            const response = await api.delete(`/api/posts/${post._id}`);
+            console.log('Post deleted successfully from server:', response.data);
+            
+            // Then remove from UI after successful server deletion
+            if (onPostDeleted) {
+                console.log('Calling onPostDeleted with ID:', post._id);
+                onPostDeleted(post._id);
+            } else {
+                console.warn('onPostDeleted callback not provided');
+            }
         } catch (error) {
             console.error('Error deleting post:', error);
-            alert('Failed to delete post from server. Please refresh to sync.');
+            if (error.response?.status === 404) {
+                // Post was already deleted, remove from UI
+                console.log('Post already deleted from server, removing from UI');
+                if (onPostDeleted) {
+                    onPostDeleted(post._id);
+                }
+            } else {
+                // If there was an error, allow retry
+                setIsDeleted(false);
+                alert('Failed to delete post. Please try again.');
+            }
         } finally {
             setDeleteLoading(false);
         }
@@ -129,12 +154,12 @@ const PostCard = ({ post, onPostUpdate, onPostDeleted, showDeleteButton = false 
                         <span className="post-date">{formatDate(post.createdAt)}</span>
                     </div>
                 </div>
-                {(showDeleteButton && post.author?._id === user?._id) && (
+                {(showDeleteButton && post.author && user && (post.author._id === user._id || post.author._id === user.id) && !isDeleted) && (
                     <div className="post-actions-header">
                         <button 
                             className="delete-btn"
                             onClick={handleDelete}
-                            disabled={deleteLoading}
+                            disabled={deleteLoading || isDeleted}
                             title="Delete post"
                         >
                             {deleteLoading ? '...' : '🗑️'}
