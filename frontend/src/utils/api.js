@@ -25,8 +25,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    if (error.response?.status === 401 && error.response?.data?.message === 'Token expired') {
+      // Only logout if token is explicitly expired
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

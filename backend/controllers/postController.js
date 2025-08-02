@@ -182,6 +182,12 @@ const likePost = async (req, res) => {
         const postId = req.params.id;
         const userId = req.user.id;
 
+        // First check if post exists
+        const postExists = await Post.findById(postId);
+        if (!postExists) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
         // Use atomic update and return the updated document
         let updatedPost = await Post.findOneAndUpdate(
             { _id: postId, 'likes.user': userId },
